@@ -12,6 +12,7 @@ class University(models.Model):
         return self.name
 
 class Profile(models.Model):
+    #users should be able to create university records.
     user       = models.OneToOneField(User, on_delete=models.CASCADE)
     university = models.ForeignKey(
                      University, on_delete=models.SET_NULL,
