@@ -341,19 +341,11 @@ footer {
     font-size: 0.875rem;
 }
 
-/* Listings Page Styles */
+/* Listings Page Styles (New) */
 .listings-page {
     padding: 2rem 0;
 }
 
-.listings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-/* Search Section */
 .search-section {
     background: #f8f9fa;
     padding: 1.5rem;
@@ -367,89 +359,31 @@ footer {
     gap: 1rem;
 }
 
-.search-form input[type="text"] {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.search-box {
+    margin-bottom: 1rem;
 }
 
 .filter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
+    margin-bottom: 1rem;
 }
 
-.filter-group label {
-    display: block;
-    margin-bottom: 0.5rem;
+.category-tag {
+    display: inline-block;
+    background: #e9ecef;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin: 0.25rem;
 }
 
-/* Listings Grid */
-.listings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 2rem;
-}
-
-.listing-card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-    transition: transform 0.2s;
-}
-
-.listing-card:hover {
-    transform: translateY(-5px);
-}
-
-.listing-image {
-    height: 200px;
-    overflow: hidden;
-}
-
-.listing-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.no-image {
-    height: 100%;
-    background: #f8f9fa;
+.listings-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    color: #6c757d;
-}
-
-.listing-content {
-    padding: 1rem;
-}
-
-.listing-content h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.1rem;
-}
-
-.price {
-    color: #28a745;
-    font-weight: bold;
-    margin: 0.5rem 0;
-}
-
-.seller {
-    color: #6c757d;
-    font-size: 0.9rem;
-}
-
-.no-listings {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 2rem;
-    background: #f8f9fa;
-    border-radius: 8px;
+    margin-bottom: 2rem;
 }
 
 /* Profile Page Styles */
@@ -489,6 +423,13 @@ footer {
 
 .profile-form {
     max-width: 500px;
+}
+
+.become-seller {
+    text-align: center;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
 }
 
 /* Responsive Design */

@@ -14,8 +14,10 @@
 
         <div class="search-section">
             <form method="get" class="search-form">
-                {{ form.query.label_tag }}
-                {{ form.query }}
+                <div class="search-box">
+                    {{ form.query.label_tag }}
+                    {{ form.query }}
+                </div>
                 
                 <div class="filter-grid">
                     <div class="filter-group">
@@ -46,7 +48,7 @@
                     {% if listing.image %}
                         <img src="{{ listing.image.url }}" alt="{{ listing.title }}">
                     {% else %}
-                        <div class="no-image">No image</div>
+                        <div class="no-image">No image available</div>
                     {% endif %}
                 </div>
                 <div class="listing-content">

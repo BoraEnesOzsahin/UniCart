@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import UserRegistrationForm, ProfileForm, ListingForm, ListingSearchForm
-from .models import Listing, Category, Profile
+from .models import Listing, Category, Profile, University
 
 def register(request):
     if request.method == 'POST':
@@ -43,23 +43,48 @@ def home(request):
 
 @login_required
 def profile(request):
+    # Ensure profile exists
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        # Get default university
+        default_university = University.objects.first()
+        if not default_university:
+            default_university = University.objects.create(name="Default University", location="Default Location")
+        profile = Profile.objects.create(user=request.user, university=default_university)
+
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=request.user.profile)
+        form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully.')
             return redirect('profile')
     else:
-        form = ProfileForm(instance=request.user.profile)
-    return render(request, 'marketplace/profile.html', {'form': form})
+        form = ProfileForm(instance=profile)
+    
+    user_listings = Listing.objects.filter(seller=request.user).order_by('-date')
+    
+    return render(request, 'marketplace/profile.html', {
+        'form': form,
+        'user_listings': user_listings
+    })
 
 def listing_list(request):
     form = ListingSearchForm(request.GET)
     listings = Listing.objects.all()
+    
     if form.is_valid():
         if form.cleaned_data['query']:
             listings = listings.filter(title__icontains=form.cleaned_data['query'])
-        # Add more filters as needed
+        if form.cleaned_data['category']:
+            listings = listings.filter(categories__name=form.cleaned_data['category'])
+        if form.cleaned_data['min_price']:
+            listings = listings.filter(price__gte=form.cleaned_data['min_price'])
+        if form.cleaned_data['max_price']:
+            listings = listings.filter(price__lte=form.cleaned_data['max_price'])
+        if form.cleaned_data['university']:
+            listings = listings.filter(seller__profile__university__name=form.cleaned_data['university'])
+    
     return render(request, 'marketplace/listing_list.html', {
         'listings': listings,
         'form': form
@@ -81,7 +106,7 @@ def listing_create(request):
             return redirect('listing_detail', pk=listing.pk)
     else:
         form = ListingForm()
-    return render(request, 'marketplace/listing_form.html', {'form': form})
+    return render(request, 'marketplace/product_create.html', {'form': form})
 
 @login_required
 def listing_edit(request, pk):
@@ -93,7 +118,7 @@ def listing_edit(request, pk):
             return redirect('listing_detail', pk=listing.pk)
     else:
         form = ListingForm(instance=listing)
-    return render(request, 'marketplace/listing_form.html', {'form': form})
+    return render(request, 'marketplace/product_create.html', {'form': form, 'editing': True})
 
 @login_required
 def listing_delete(request, pk):
@@ -101,7 +126,7 @@ def listing_delete(request, pk):
     if request.method == 'POST':
         listing.delete()
         return redirect('listing_list')
-    return render(request, 'marketplace/listing_delete.html', {'listing': listing})
+    return render(request, 'marketplace/product_delete.html', {'listing': listing})
 
 def support(request):
     return render(request, 'marketplace/support.html')
