@@ -70,24 +70,26 @@ def profile(request):
     })
 
 def listing_list(request):
-    form = ListingSearchForm(request.GET)
     listings = Listing.objects.all()
+    form = ListingSearchForm(request.GET)
     
     if form.is_valid():
-        if form.cleaned_data['query']:
-            listings = listings.filter(title__icontains=form.cleaned_data['query'])
-        if form.cleaned_data['category']:
-            listings = listings.filter(categories__name=form.cleaned_data['category'])
-        if form.cleaned_data['min_price']:
+        # Check if category is selected and not empty
+        if form.cleaned_data.get('category'):
+            listings = listings.filter(categories=form.cleaned_data['category'])
+        
+        # Handle other filters
+        if form.cleaned_data.get('min_price'):
             listings = listings.filter(price__gte=form.cleaned_data['min_price'])
-        if form.cleaned_data['max_price']:
+        if form.cleaned_data.get('max_price'):
             listings = listings.filter(price__lte=form.cleaned_data['max_price'])
-        if form.cleaned_data['university']:
-            listings = listings.filter(seller__profile__university__name=form.cleaned_data['university'])
-    
+        if form.cleaned_data.get('query'):
+            listings = listings.filter(title__icontains=form.cleaned_data['query'])
+
     return render(request, 'marketplace/listing_list.html', {
         'listings': listings,
-        'form': form
+        'form': form,
+        'selected_category': form.cleaned_data.get('category') if form.is_valid() else None
     })
 
 def listing_detail(request, pk):

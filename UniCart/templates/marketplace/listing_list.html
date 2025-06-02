@@ -32,40 +32,30 @@
                         {{ form.max_price.label_tag }}
                         {{ form.max_price }}
                     </div>
-                    <div class="filter-group">
-                        {{ form.university.label_tag }}
-                        {{ form.university }}
-                    </div>
                 </div>
                 <button type="submit" class="btn btn-secondary">Search</button>
             </form>
         </div>
 
+        {% if selected_category %}
+        <div class="category-header">
+            <h2>Listings in {{ selected_category.name }}</h2>
+        </div>
+        {% endif %}
+
         <div class="listings-grid">
             {% for listing in listings %}
             <div class="listing-card">
-                <div class="listing-image">
-                    {% if listing.image %}
-                        <img src="{{ listing.image.url }}" alt="{{ listing.title }}">
-                    {% else %}
-                        <div class="no-image">No image available</div>
-                    {% endif %}
-                </div>
                 <div class="listing-content">
                     <h3>{{ listing.title }}</h3>
                     <p class="price">${{ listing.price }}</p>
                     <p class="seller">by {{ listing.seller.username }}</p>
-                    <div class="listing-categories">
-                        {% for category in listing.categories.all %}
-                            <span class="category-tag">{{ category.name }}</span>
-                        {% endfor %}
-                    </div>
                     <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-secondary">View Details</a>
                 </div>
             </div>
             {% empty %}
             <div class="no-listings">
-                <p>No listings found matching your criteria.</p>
+                <p>No listings found {% if selected_category %}in {{ selected_category.name }}{% endif %}</p>
             </div>
             {% endfor %}
         </div>

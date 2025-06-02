@@ -20,10 +20,12 @@
         <div class="listings-grid">
             {% for listing in featured_listings %}
             <div class="listing-card">
-                <img src="{{ listing.image.url }}" alt="{{ listing.title }}">
-                <h3>{{ listing.title }}</h3>
-                <p>{{ listing.price }}</p>
-                <a href="{% url 'listing_detail' listing.id %}" class="btn btn-small">View Details</a>
+                <div class="listing-content">
+                    <h3>{{ listing.title }}</h3>
+                    <p class="price">${{ listing.price }}</p>
+                    <p class="seller">by {{ listing.seller.username }}</p>
+                    <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-secondary">View Details</a>
+                </div>
             </div>
             {% empty %}
             <p>No listings available.</p>
