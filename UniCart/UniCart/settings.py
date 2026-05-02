@@ -10,7 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+try:
+    import dj_database_url
+except ImportError:  # Local fallback before dependencies are installed.
+    dj_database_url = None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +26,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#vya_pny^i%9*n*la56_ec3@xxm4f!r+vr99ho0q^+j!ar+r0w'
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-#vya_pny^i%9*n*la56_ec3@xxm4f!r+vr99ho0q^+j!ar+r0w'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        'DJANGO_ALLOWED_HOSTS',
+        '127.0.0.1,localhost,.vercel.app'
+    ).split(',')
+    if host.strip()
+]
 
 
 # Application definition
@@ -39,6 +55,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'marketplace',  # Custom app for marketplace functionality
 ]
+
+USE_SUPABASE_STORAGE = os.getenv('USE_SUPABASE_STORAGE', 'False').lower() == 'true'
+if USE_SUPABASE_STORAGE:
+    INSTALLED_APPS.append('storages')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -73,12 +93,30 @@ WSGI_APPLICATION = 'UniCart.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if dj_database_url:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=f"sqlite:///{(BASE_DIR / 'db.sqlite3').as_posix()}",
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        'DJANGO_CSRF_TRUSTED_ORIGINS',
+        'https://*.vercel.app'
+    ).split(',')
+    if origin.strip()
+]
 
 
 # Password validation
@@ -122,6 +160,28 @@ STATICFILES_DIRS = [
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+if USE_SUPABASE_STORAGE:
+    AWS_S3_ENDPOINT_URL = os.getenv('SUPABASE_S3_ENDPOINT_URL')
+    AWS_ACCESS_KEY_ID = os.getenv('SUPABASE_S3_ACCESS_KEY')
+    AWS_SECRET_ACCESS_KEY = os.getenv('SUPABASE_S3_SECRET_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('SUPABASE_STORAGE_BUCKET')
+    AWS_S3_REGION_NAME = os.getenv('SUPABASE_S3_REGION', 'us-east-1')
+    AWS_S3_ADDRESSING_STYLE = 'path'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_DEFAULT_ACL = None
+    AWS_S3_FILE_OVERWRITE = False
+
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+
+    MEDIA_URL = os.getenv('SUPABASE_PUBLIC_MEDIA_URL', '/media/').rstrip('/') + '/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
